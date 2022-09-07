@@ -1,0 +1,24 @@
+{
+    "name": "aolr/user-bundle",
+    "description": "user management",
+    "require": {
+        "symfony/security-bundle": "5.4.*",
+        "gregwar/captcha-bundle": "^2.1"
+    },
+    "authors": [
+        {
+            "name": "Miles",
+            "email": "support@aolr.pub"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Aolr\\UserBundle\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}

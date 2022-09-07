@@ -1,0 +1,93 @@
+{% extends '@AolrUser/base.html.twig' %}
+
+{% block title %}{{ parent() }} | Confirmation{% endblock %}
+{% trans_default_domain 'aolr_user' %}
+{% block auth_wrapper %}
+    <div class="text-center m-auto">
+        <img src="{{ asset('bundles/aolruser/image/email_success.png') }}" alt="mail sent image" height="64" />
+        <h4 class="text-dark-50 text-center mt-4 font-weight-bold">Please check your email</h4>
+        <p class="text-muted mb-4">
+            {{ 'confirmation.message_prefix'|trans({'%email%':user.email})|raw }} {{ message }}
+        </p>
+    </div>
+
+
+    <div class="form-group mb-0 py-4 d-flex justify-content-between align-items-center">
+        <div class="w-50">
+            {{ 'confirmation.re-send'|trans({'%url%': path('user_resend_verify_email', {'type': type}), '%email%': user.email})|raw }}
+        </div>
+        <a class="btn btn-primary" href="{{ path('app_login') }}">
+            <i class="mdi mdi-login mr-1"></i> {{ 'confirmation.login'|trans }}
+        </a>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        ! (function($) {
+            "use strict";
+            const verifier = function(ele) {
+                if (ele instanceof $) {
+                    this.ele = ele;
+                } else {
+                    this.ele = $(ele);
+                }
+                this.disabled = false;
+            };
+
+            verifier.prototype.send = function(email, next) {
+                const $this = this;
+                const url = this.ele.data('send-url')
+                this.ele.attr('disabled', 'disabled');
+
+                $.ajax({
+                    method: "POST",
+                    url: url,
+                    data: {email: email},
+                    success: function(res) {
+                        next(res);
+                        let s = 60;
+                        const timer = setInterval(function() {
+                            $this.ele.html('Re-send after ' + s + ' s');
+                            s--;
+                            if (s === 0) {
+                                $this.ele.html('Re-Send Email')
+                                $this.ele.removeAttr('disabled');
+                                clearInterval(timer);
+                            }
+                        }, 1000);
+                    },
+                    error: function(err) {
+                        $this.ele.removeAttr('disabled');
+                        $.alert.error(err.statusText);
+                    }
+                })
+
+            };
+
+            $.verifier = function(ele) {
+                return new verifier(ele);
+            };
+            $.verifier.constructor = verifier;
+        })(window.jQuery);
+    </script>
+
+    <script>
+        $(function () {
+            $("#resend-verify-email").click(function(e) {
+                e.preventDefault();
+                const email = $(this).data("email");
+                if (email === '' || email.indexOf('@') < 1) {
+                    $.alert.error('Please enter a valid email');
+                    $('#user_register_email').focus();
+                    return;
+                }
+                $.verifier($(this)).send(email, function(res) {
+                    if (res.code === 500) {
+                        $.alert.error(res.message);
+                    }
+                });
+            })
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,19 @@
+<form action="{{ path('_ajax_save_user_role', {id:user.id}) }}">
+    <ul class="list-group list-group-flush">
+        {% for role in roles %}
+        <li class="list-group-item">
+            <div class="form-check">
+                <input class="form-check-input"
+                       name="roles[]"
+                       type="checkbox"
+                       value="{{ role.id }}"
+                       {{ user.userRoles.contains(role) ? 'checked' : '' }}
+                       id="role-item-{{ role.id }}">
+                <label class="form-check-label" for="role-item-{{ role.id }}">
+                    {{ role.name }}
+                </label>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</form>

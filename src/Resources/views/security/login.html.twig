@@ -1,0 +1,134 @@
+{% extends '@AolrUser/base.html.twig' %}
+
+{% block title %}{{ parent() }} | Login Page{% endblock %}
+{% trans_default_domain 'aolr_user' %}
+{% block auth_wrapper %}
+    <form method="post" action="{{ path('app_login') }}">
+        <a href="/" class="login-logo">
+            <img src="{{ asset(aolrUserConfig.logo) }}" alt="aolr">
+        </a>
+
+        {% set flashmsg = app.flashes('alert-success')|default(false) %}
+        {% if flashmsg and flashmsg|length > 0 %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {% for msg in flashmsg %}
+                    <strong>Success - </strong> {{ msg|raw }}
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+        {% set flashmsg = app.flashes('alert-error')|default(false) %}
+        {% if flashmsg and flashmsg|length > 0 %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {% for msg in flashmsg %}
+                    <strong>Failed - </strong> {{ msg|raw }}
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+        <h6 class="pb-4">{{ 'login.tip'|trans|raw }}</h6>
+        {% if error %}
+            <div class="alert alert-danger mb-3">
+                {% if error.messageKey == 'NOT_VERIFIED'  %}
+                    {{ 'login.error_not_verfied'|trans({'%send_url%': path('user_resend_verify_email')})|raw }}
+                {% else %}
+                    {{ error.messageKey }}
+                {% endif %}
+            </div>
+        {% endif %}
+        <div class="field-wrapper mb-4">
+            <input class="form-control" name="_username" type="email" id="inputEmail" required="required" value="{{ last_username }}" placeholder="{{ 'login.email_placeholder'|trans }}" autofocus>
+            <div class="field-placeholder">{{ 'login.email'|trans }}</div>
+        </div>
+        <div class="field-wrapper">
+            <input type="password" name="_password" id="inputPassword" class="form-control" placeholder="{{ 'login.password_placeholder'|trans }}" required="required">
+            <div class="field-placeholder">{{ 'login.password'|trans }}</div>
+        </div>
+        <div class="form-group mb-3">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" name="_remember_me" class="custom-control-input" id="checkbox-signin" checked="">
+                <label class="custom-control-label" for="checkbox-signin">{{ 'login.remember_me'|trans }}</label>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            </div>
+        </div>
+        <div class="actions pt-4">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <a href="{{ path('user_forgot_password') }}">{{ 'login.forgot_password'|trans }}</a>
+            <button type="submit" class="btn btn-primary">{{ 'login.sign_in'|trans }}</button>
+        </div>
+        <div class="login-footer">
+            <span class="additional-link">{{ 'login.sign_up'|trans({'%url%': path('user_register') })|raw }}</span>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        ! (function($) {
+            "use strict";
+            const verifier = function(ele) {
+                if (ele instanceof $) {
+                    this.ele = ele;
+                } else {
+                    this.ele = $(ele);
+                }
+                this.disabled = false;
+            };
+
+            verifier.prototype.send = function(email, next) {
+                const $this = this;
+                const url = this.ele.data('send-url')
+                this.ele.attr('disabled', 'disabled');
+
+                $.ajax({
+                    method: "POST",
+                    url: url,
+                    data: {email: email},
+                    success: function(res) {
+                        next(res);
+                        let s = 60;
+                        const timer = setInterval(function() {
+                            $this.ele.html('Re-send after ' + s + ' s');
+                            s--;
+                            if (s === 0) {
+                                $this.ele.html('Re-Send Email')
+                                $this.ele.removeAttr('disabled');
+                                clearInterval(timer);
+                            }
+                        }, 1000);
+                    },
+                    error: function(err) {
+                        $this.ele.removeAttr('disabled');
+                        $.alert.error(err.statusText);
+                    }
+                })
+
+            };
+
+            $.verifier = function(ele) {
+                return new verifier(ele);
+            };
+            $.verifier.constructor = verifier;
+        })(window.jQuery);
+    </script>
+
+    <script>
+        $(function () {
+           $("#resend-verify-email").click(function(e) {
+               e.preventDefault();
+               const email = $.trim($('#inputEmail').val());
+               if (email === '' || email.indexOf('@') < 1) {
+                   $.alert.error('Please enter a valid email');
+                   $('#user_register_email').focus();
+                   return;
+               }
+               $.verifier($(this)).send(email, function(res) {
+                   if (res.code === 500) {
+                       $.alert.error(res.message);
+                   }
+               });
+           })
+        });
+    </script>
+{% endblock %}

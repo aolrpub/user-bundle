@@ -1,0 +1,132 @@
+{% extends 'uni/base.html.twig' %}
+
+{% block content %}
+    {{ uni_page_title('<a href="' ~ path('dashboard_overview') ~ '">Dashboard</a>', 'Admin - Employee Management') }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                        <thead>
+                        <tr>
+                            <th{% if pagination.isSorted('u.id') %} class="sorted"{% endif %}>
+                                {{ knp_pagination_sortable(pagination, '#', 'u.id') }}
+                            </th>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Roles</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in pagination %}
+                            <tr class="">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.fullname }}</td>
+                                <td>
+                                    <i class="fa-solid fa-circle text-{{ user.isVerified ? 'success' : 'danger'}}"></i>
+                                    Verified - {{ user.isVerified ? 'Yes' : 'No'}}
+                                    <br>
+                                    <i class="fa-solid fa-circle text-{{ user.isActive ? 'success' : 'danger'}}"></i>
+                                    Active - {{ user.isActive ? 'Yes' : 'No'}}
+                                </td>
+                                <td>
+                                    <div id="role-list-{{ user.id }}" class="role-list">{{ user.roles|join('<br>')|raw }}</div>
+                                    <a href="{{ path('ajax_employee_management_roles', {id: user.id}) }}" class="btn btn-outline-success btn-sm change_role_btn">Edit</a>
+                                </td>
+                                <td>
+                                    <div class="aolr-actions">
+                                        <a href="javascript:void(0);" class="btn btn-outline-primary rounded ms-1"> <span class="fa-solid fa-eye1"></span></a>
+                                        <a href="javascript: void(0);" class="btn btn-outline-danger rounded ms-1"> <span class="fa-solid fa-xmark"></span></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                    <div class="row mt-2">
+                        {{ knp_pagination_render(pagination) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="employee-roles-list"
+         class="modal fade "
+         tabindex="-1" role="dialog"
+         aria-labelledby="success-header-modalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-colored-header bg-success">
+                    <h4 class="modal-title" id="success-header-modalLabel">Available Roles</h4>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="save-roles">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    {{ block('form_modal') }}
+    {{ block('alert_modal') }}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    $(function () {
+        $('.change_role_btn').click(function (e) {
+            e.preventDefault();
+
+            const modal = $.customModal('#formModal', {
+                backdrop: 'static'
+            });
+            modal.customizeTitle('Available Roles');
+            modal.customizeFooter('<button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-success" id="save-roles">Save changes</button>');
+            modal.hideFooter(false);
+
+            $.post($(this).attr('href'), function (res) {
+                modal.customizeBody(res);
+                modal.show();
+            }).fail(function (err) {
+                $.alert.error(err.statusText)
+
+            });
+
+            modal.ele.off('click').on('click', '#save-roles', function(e) {
+                e.preventDefault();
+                const roleForm = $(this).closest(".modal").find("form");
+
+                console.log(roleForm.attr('action'))
+                $.post(roleForm.attr('action'), roleForm.serialize(), function (res) {
+                    modal.hide();
+                    $("#role-list-" + res.user_id).html(res.roles.join('<br>')).fadeOut(500).fadeIn(500);
+
+
+                    $('#toasts').notify({
+                        delay: 6000,
+                        removeIcon: '<i class="fa-solid fa-xmark"></i>'
+                    }).show("Saved User Roles", {
+                        type: 'success',
+                        title:  "Well Done!",
+                        icon: '<i class="fa-solid fa-circle-check"></i>'
+                    });
+                }).fail(function (err) {
+                    $.alert.error(err.statusText);
+
+                })
+            });
+        });
+
+    });
+</script>
+{% endblock %}

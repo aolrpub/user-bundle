@@ -1,0 +1,136 @@
+{% extends '@AolrUser/base.html.twig' %}
+{% form_theme form _self %}
+
+{% block captcha_widget %}
+    {% if is_human %}
+        -
+    {% else %}
+        {% apply spaceless %}
+            <img class="captcha_image" id="{{ image_id }}" src="{{ captcha_code }}" alt="" title="captcha" width="{{ captcha_width }}" height="{{ captcha_height }}" />
+            {% if reload %}
+                <script type="text/javascript">
+                    function reload_{{ image_id }}() {
+                        var img = document.getElementById('{{ image_id }}');
+                        img.src = '{{ captcha_code }}?n=' + (new Date()).getTime();
+                    }
+                </script>
+                <a class="captcha_reload ms-sm-2" href="javascript:reload_{{ image_id }}();">{{ 'Renew'|trans({}, 'gregwar_captcha') }}</a>
+            {% endif %}
+            <div class="mt-1">
+                Type the characters you see in the image above:
+                {{ form_widget(form) }}
+                {{ form_errors(form) }}
+            </div>
+        {% endapply %}
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ parent() }} | Login Page{% endblock %}
+{% block auth_wrapper %}
+    {{ form_start(form) }}
+        <a href="/" class="login-logo">
+            <img src="{{ asset(aolrUserConfig.logo) }}" alt="aolr">
+        </a>
+        <h6>Welcome to {{ aolrUserConfig.publisherName }},<br>Create your account.</h6>
+
+
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+
+        <div class="row">
+            <div class="col-6">
+                {{ form_widget(form.code) }}
+            </div>
+            <div class="col-6">
+                <button id="get-code" data-get-url="{{ path('_ajax_user_verification_code') }}" type="button" class="btn btn-light w-100">Get Code</button>
+            </div>
+            <div class="col-12 text-muted mt-2">
+                Will send a six digital code to your email by clicking button "Get Code"
+            </div>
+        </div>
+
+        <div class="form-group mt-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" required="required" class="custom-control-input" id="checkbox-signup">
+                <label class="custom-control-label" for="checkbox-signup">I accept <a href="#" class="text-muted">Terms and Conditions</a></label>
+            </div>
+        </div>
+
+        {{ form_rest(form) }}
+        <div class="actions">
+            <button type="submit" class="btn btn-primary ms-auto">Sign Up</button>
+        </div>
+        <div class="login-footer">
+            <span class="additional-link">Have an account? <a href="{{ path('app_login') }}" class="btn btn-light btn-sm">Login</a></span>
+        </div>
+    {{ form_end(form) }}
+    {{ block('alert_modal') }}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+! (function($) {
+    "use strict";
+    const verifier = function(ele) {
+        if (ele instanceof $) {
+            this.ele = ele;
+        } else {
+            this.ele = $(ele);
+        }
+        this.disabled = false;
+    };
+
+    verifier.prototype.send = function(email) {
+        const $this = this;
+        const url = this.ele.data('get-url')
+        this.ele.attr('disabled', 'disabled');
+
+        $.ajax({
+            method: "POST",
+            url: url,
+            data: {email: email},
+            success: function(res) {
+                let s = 60;
+                const timer = setInterval(function() {
+                    $this.ele.html('Re-Send after ' + s + ' s');
+                    s--;
+                    if (s === 0) {
+                        $this.ele.html('Re-Send Code')
+                        $this.ele.removeAttr('disabled');
+                        clearInterval(timer);
+                    }
+                }, 1000);
+            },
+            error: function(err) {
+                $this.ele.removeAttr('disabled');
+                $.alert.error(err.statusText);
+            }
+        })
+
+    };
+
+    $.verifier = function(ele) {
+        return new verifier(ele);
+    };
+    $.verifier.constructor = verifier;
+})(window.jQuery);
+</script>
+<script>
+$(function() {
+
+
+    $("#get-code").click(function(e) {
+        const email = $.trim($('#user_register_email').val());
+        if (email === '' || email.indexOf('@') < 1) {
+            $.alert.error('Please enter a valid email');
+            $('#user_register_email').focus();
+            return;
+        }
+
+        $.verifier($(this)).send(email);
+
+    });
+});
+</script>
+{% endblock %}

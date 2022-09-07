@@ -1,0 +1,67 @@
+{% extends '@AolrUni/base.html.twig' %}
+{% block meta %}{{ parent() }}{% endblock %}
+{% block title %}{{ aolrUserConfig.publisherName }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <style>
+        #local-selector {
+            position: absolute;
+
+            top: 1rem;
+            right: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <body class="authentication bg-atom" style="background-image: none;">
+    {% block page_wrapper %}
+        <div class="login-container">
+
+            <div class="container-fluid h-100 px-0 position-relative">
+
+                <!-- Row start -->
+                <div class="row g-0 h-100">
+                    {% include '@AolrUser/security/_left_side.html.twig' %}
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12  ">
+                        <div class="row justify-content-center h-100 mx-0">
+                            <div class="col-sm-10 col-md-8 col-lg-6">
+
+                                <div class="login-wrapper">
+                                    <div class="login-screen w-100" style="max-width: 100%;">
+                                        <div class="login-body">
+                                            {% block auth_wrapper %}{% endblock %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="local-selector" class="dropdown show fs-6">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa-solid fa-globe"></i> {{ app.request.locale|replace({'zh_':''})|upper }}
+                    </a>
+
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="{{ path('app_change_locale', {'locale':'en'}) }}">English</a>
+                        <li><hr class="dropdown-divider"></li>
+                        <a class="dropdown-item" href="{{ path('app_change_locale', {'locale':'zh_CN'}) }}">简体中文</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ parent() }}
+    {% endblock %}
+    </body>
+{% endblock %}
+

@@ -1,0 +1,166 @@
+{% extends 'uni/base.html.twig' %}
+
+{% block content %}
+{{ uni_page_title('<a href="' ~ path('dashboard_overview') ~ '">Dashboard</a>', 'Admin - User Management') }}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th{% if pagination.isSorted('u.id') %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(pagination, '#', 'u.id') }}
+                        </th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th{% if pagination.isSorted('u.isActive') %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(pagination, 'Active?', 'u.isActive') }}
+                        </th>
+                        <th{% if pagination.isSorted('u.isVerified') %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(pagination, 'Verified?', 'u.isVerified') }}
+                        </th>
+                        <th{% if pagination.isSorted('u.registerAt') %} class="sorted"{% endif %}>
+                            {{ knp_pagination_sortable(pagination, 'Register Date', 'u.registerAt') }}
+                        </th>
+
+                        <th>Roles</th>
+{#                        <th{% if pagination.isSorted('u.isEmployee') %} class="sorted"{% endif %}>#}
+{#                            {{ knp_pagination_sortable(pagination, 'Employee?', 'u.isEmployee') }}#}
+{#                        </th>#}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in pagination %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.fullname }}</td>
+                            <td>
+                                <!-- Switch-->
+                                <div class="form-switch ajax-switch">
+                                    <input class="form-check-input" data-url="{{ path('ajax_user_management_change_active', {id:user.id}) }}" type="checkbox" id="user-active-{{ user.id }}" {{ user.isActive ? 'checked' : '' }} />
+                                    <label class="form-check-label" for="user-active-{{ user.id }}"></label>
+                                    <div class="spinner-border spinner-border-sm text-danger" style="display: none;" role="status"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-switch ajax-switch">
+                                    <input class="form-check-input" data-url="{{ path('ajax_user_management_change_verified', {id:user.id}) }}" type="checkbox" id="user-verified-{{ user.id }}" {{ user.isVerified ? 'checked' : '' }}/>
+                                    <label class="form-check-label" for="user-verified-{{ user.id }}"></label>
+                                    <div class="spinner-border spinner-border-sm text-danger" style="display: none;" role="status"></div>
+                                </div>
+                            </td>
+                            <td>
+                                {{ user.registerAt|date('j F Y') }}
+                            </td>
+                            <td>
+                                <div id="role-list-{{ user.id }}" class="role-list">{{ user.roles|join('<br>')|raw }}</div>
+                                <a href="{{ path('ajax_employee_management_roles', {id: user.id}) }}" class="btn btn-outline-success btn-sm change_role_btn">Edit</a>
+                            </td>
+{#                            <td>#}
+{#                                <div class="form-switch ajax-switch">#}
+{#                                    <input class="form-check-input" data-url="{{ path('ajax_user_management_change_employee', {id:user.id}) }}" type="checkbox" id="user-employee-{{ user.id }}" {{ user.isEmployee ? 'checked' : '' }} />#}
+{#                                    <label class="form-check-label" for="user-employee-{{ user.id }}" ></label>#}
+{#                                    <div class="spinner-border spinner-border-sm text-danger" style="display: none;" role="status"></div>#}
+{#                                </div>#}
+{#                            </td>#}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                <div class="row mt-2">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ block('form_modal') }}
+{{ block('alert_modal') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(function () {
+            $('.ajax-switch').find('input').click(function (e) {
+                $(this).prop('disabled', 'disabled');
+                $(this).next().next().show();
+                const $this = $(this);
+                $this.parent().find('div').show();
+                const url = $(this).data('url');
+                const value = $(this).is(':checked');
+                $.ajax({
+                    url:url,
+                    method: 'POST',
+                    data: {
+                        value:value ? 1 : 0
+                    },
+                    success: function (res) {
+                        $this.next().next().hide();
+                        $this.removeAttr('disabled')
+                    },
+                     error:function (err) {
+                         if (value) {
+                             $this.prop('checked', false);
+                         } else {
+                             $this.prop('checked', 'checked')
+                         }
+                         $.alert.error(err.statusText)
+                         $this.next().next().hide();
+                         $this.removeAttr('disabled')
+                     }
+                })
+            });
+
+            $('.change_role_btn').click(function (e) {
+                e.preventDefault();
+
+                const modal = $.customModal('#formModal', {
+                    backdrop: 'static'
+                });
+                modal.customizeTitle('Available Roles');
+                modal.customizeFooter('<button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-success" id="save-roles">Save changes</button>');
+                modal.hideFooter(false);
+
+                $.post($(this).attr('href'), function (res) {
+                    modal.customizeBody(res);
+                    modal.show();
+                }).fail(function (err) {
+                    $.alert.error(err.statusText)
+
+                });
+
+                modal.ele.off('click').on('click', '#save-roles', function(e) {
+                    e.preventDefault();
+                    const roleForm = $(this).closest(".modal").find("form");
+
+                    console.log(roleForm.attr('action'))
+                    $.post(roleForm.attr('action'), roleForm.serialize(), function (res) {
+                        modal.hide();
+                        $("#role-list-" + res.user_id).html(res.roles.join('<br>')).fadeOut(500).fadeIn(500);
+
+
+                        $('#toasts').notify({
+                            delay: 6000,
+                            removeIcon: '<i class="fa-solid fa-xmark"></i>'
+                        }).show("Saved User Roles", {
+                            type: 'success',
+                            title:  "Well Done!",
+                            icon: '<i class="fa-solid fa-circle-check"></i>'
+                        });
+                    }).fail(function (err) {
+                        $.alert.error(err.statusText);
+
+                    })
+                });
+            });
+        });
+
+
+    </script>
+{% endblock %}

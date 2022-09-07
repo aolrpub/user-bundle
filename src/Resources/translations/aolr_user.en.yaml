@@ -1,0 +1,63 @@
+cover:
+    desc: 'Aolr builder is built on one main idea: to build a scholar journal homepage in a easy way, never install nor configure like developing a website.'
+    know_more: Know More
+login:
+    tip: 'Welcome back,<br>Please login to your account.'
+    error_not_verfied: 'Please verify your email first.<br>No verification email received?  <button id="resend-verify-email" type="button" class="btn btn-light py-0 px-2 ms-2" data-send-url="%send-url%"> Re-Send </button>'
+    email: Email
+    email_placeholder: Enter your email
+    password: Password
+    password_placeholder: Enter your password
+    remember_me: Remember me
+    forgot_password: Forgot password?
+    sign_in: Sign in
+    sign_up: 'No Account? <a href="%url%" class="btn btn-light btn-sm">Sign Up</a>'
+register:
+    tip: 'Welcome to %publisher%,<br>Create your account.'
+    captcha_tip: 'Type the characters you see in the image above:'
+    term_label: 'I accept <a href="%url%" class="text-muted">Privacy Policy</a>'
+    login: 'Have an account? <a href="%url%" class="btn btn-light btn-sm">Login</a>'
+    sign_up: Sign Up
+forgot_password:
+    tip: 'In order to access your %publisher% account, please enter the email address you provided during the registration process.'
+    sign_in: Sign In
+    submit: Submit
+confirmation:
+    message_prefix: 'An email has been send to <b>%email%</b>.'
+    message: 'Please check for an email from company.'
+    message_reset: 'Please check for an email from company and click on the included link to reset your password.'
+    message_registration: 'Please check for an email from company and click on the included link to verify your email.'
+
+    re-send: '<span>No email received?</span>  <button id="resend-verify-email" type="button" class="btn btn-light py-0 px-2 ms-2 mt-1" data-send-url="%url%" data-email="%email%"> Re-Send </button>'
+    login: 'Back to Sign In'
+
+reset_password:
+    tip: 'Reset Password for "%email%"'
+    sign_in: Sign In
+    reset: Reset
+form:
+    UserRegisterType:
+        email:
+            label: 'Email Address'
+            placeholder: 'Email Address'
+            constraints:
+                callback_1: 'The e-mail address has been registered.'
+        password:
+            label: 'Password'
+            label_1: 'Password'
+            label_2: 'Confirm password'
+            invalid_message: 'The new password fields must match.'
+        captcha:
+            label: ''
+            placeholder: 'Captcha Text'
+    ForgotPassword:
+        email:
+            label: 'Email Address'
+            constraints:
+                callback_1: 'Email is not exist, please register directly.'
+    UserResetPasswordType:
+        password:
+            label: 'Password'
+            label_1: 'New Password'
+            label_2: 'Confirm new password'
+            invalid_message: 'The new password fields must match.'

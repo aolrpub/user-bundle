@@ -1,0 +1,15 @@
+services:
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    Aolr\UserBundle\:
+        resource: '../../../src/'
+        exclude:
+            - '../../../src/DependencyInjection/'
+            - '../../../src/Entity/'
+            - '../../../src/Resources/'
+            - '../../../src/AolrUserBundle.php'
+
+    Aolr\UserBundle\Service\ConfigManager:
+        arguments:
+            - []

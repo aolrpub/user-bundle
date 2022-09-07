@@ -1,0 +1,57 @@
+{% extends '@AolrUser/base.html.twig' %}
+{% form_theme form _self %}
+
+{% block captcha_widget %}
+    {% if is_human %}
+        -
+    {% else %}
+        {% apply spaceless %}
+            <img class="captcha_image" id="{{ image_id }}" src="{{ captcha_code }}" alt="" title="captcha" width="{{ captcha_width }}" height="{{ captcha_height }}" />
+            {% if reload %}
+                <script type="text/javascript">
+                    function reload_{{ image_id }}() {
+                        var img = document.getElementById('{{ image_id }}');
+                        img.src = '{{ captcha_code }}?n=' + (new Date()).getTime();
+                    }
+                </script>
+                <a class="captcha_reload ms-sm-2" href="javascript:reload_{{ image_id }}();">{{ 'Renew'|trans({}, 'gregwar_captcha') }}</a>
+            {% endif %}
+            <div class="mt-1">
+                {{ 'register.captcha_tip'|trans|raw }}
+                {{ form_widget(form) }}
+                {{ form_errors(form) }}
+            </div>
+        {% endapply %}
+    {% endif %}
+{% endblock %}
+
+{% block title %}{{ parent() }} | Login Page{% endblock %}
+{% trans_default_domain 'aolr_user' %}
+{% block auth_wrapper %}
+    {{ form_start(form) }}
+        <a href="/" class="login-logo">
+            <img src="{{ asset(aolrUserConfig.logo) }}" alt="aolr">
+        </a>
+        <h6>{{ 'register.tip'|trans({'%publisher%': aolrUserConfig.publisherName })|raw }}</h6>
+
+
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+
+        {{ form_widget(form.captcha) }}
+
+        <div class="form-group mt-2">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" required="required" class="custom-control-input" id="checkbox-signup">
+                <label class="custom-control-label" for="checkbox-signup">{{ 'register.term_label'|trans({'%url%':'#'})|raw }}</label>
+            </div>
+        </div>
+        {{ form_rest(form) }}
+        <div class="actions">
+            <button type="submit" class="btn btn-primary ms-auto">{{ 'register.sign_up'|trans }}</button>
+        </div>
+        <div class="login-footer">
+            <span class="additional-link">{{ 'register.login'|trans({'%url%':path('app_login')})|raw }}</span>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}
