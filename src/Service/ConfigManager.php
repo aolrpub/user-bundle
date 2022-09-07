@@ -43,4 +43,8 @@ class ConfigManager
     {
         return $this->parameters['emails'] ?? [];
     }
+    public function getPrivacyUrl()
+    {
+        return $this->parameters['privacy_url'] ?? '#';
+    }
 }

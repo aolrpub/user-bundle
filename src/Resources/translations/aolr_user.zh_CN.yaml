@@ -15,7 +15,7 @@ login:
 register:
     tip: '欢迎来到 %publisher%,<br>免费注册你的账号.'
     captcha_tip: '输入你在上面图片上看到的验证码:'
-    term_label: '我接受 <a href="%url%" class="text-muted">隐私政策</a>'
+    term_label: '我接受 <a href="%url%" target="_blank" class="text-muted">隐私政策</a>'
     login: '已经有账号了? <a href="%url%" class="btn btn-light btn-sm">登 录</a>'
     sign_up: 注 册
 forgot_password:

@@ -43,7 +43,7 @@
         <div class="form-group mt-2">
             <div class="custom-control custom-checkbox">
                 <input type="checkbox" required="required" class="custom-control-input" id="checkbox-signup">
-                <label class="custom-control-label" for="checkbox-signup">{{ 'register.term_label'|trans({'%url%':'#'})|raw }}</label>
+                <label class="custom-control-label" for="checkbox-signup">{{ 'register.term_label'|trans({'%url%':aolrUserConfig.privacyUrl})|raw }}</label>
             </div>
         </div>
         {{ form_rest(form) }}

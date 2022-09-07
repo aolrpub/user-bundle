@@ -16,6 +16,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('aolr_pub_link')->end()
                 ->scalarNode('support_email')->end()
                 ->scalarNode('publisher_name')->defaultValue('Aolr')->end()
+                ->scalarNode('privacy_url')->end()
                 ->scalarNode('logo')->defaultValue('/images/logo.png')->end()
                 ->scalarNode('manager_name')->defaultValue('default')->end()
                 ->arrayNode('emails')

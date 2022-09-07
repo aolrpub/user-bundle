@@ -15,7 +15,7 @@ login:
 register:
     tip: 'Welcome to %publisher%,<br>Create your account.'
     captcha_tip: 'Type the characters you see in the image above:'
-    term_label: 'I accept <a href="%url%" class="text-muted">Privacy Policy</a>'
+    term_label: 'I accept <a href="%url%" target="_blank" class="text-muted">Privacy Policy</a>'
     login: 'Have an account? <a href="%url%" class="btn btn-light btn-sm">Login</a>'
     sign_up: Sign Up
 forgot_password:
